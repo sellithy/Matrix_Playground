@@ -4,12 +4,12 @@ private operator fun Number.plus(other: Number): Number =
     else
         this.toDouble() + other.toDouble()
 
-sealed class Expression {
-    abstract operator fun plus(exp: Expression): Expression
-    abstract override fun toString() : String
+sealed interface Expression {
+    operator fun plus(exp: Expression): Expression
+    override fun toString() : String
 }
 
-class Poly(private val poly: List<Term>) : Expression(), List<Term> by poly {
+class Poly(private val poly: List<Term>) : Expression, List<Term> by poly {
 
     constructor(terms: PolyBuilder.() -> Unit) : this(
         PolyBuilder().run {
@@ -52,11 +52,9 @@ class Poly(private val poly: List<Term>) : Expression(), List<Term> by poly {
 }
 
 //region Term
-sealed class Term : Expression() {
-    abstract override fun toString(): String
-}
+sealed interface Term : Expression
 
-class JustANumber(val number: Number) : Term() {
+class JustANumber(val number: Number) : Term {
     override fun toString() = number.toString()
 
     override fun plus(exp: Expression) =
@@ -68,7 +66,7 @@ class JustANumber(val number: Number) : Term() {
 
 }
 
-class Combo(val number: Number, val letter: Char) : Term(){
+class Combo(val number: Number, val letter: Char) : Term{
     constructor(pair: Pair<Number, Char>) : this(pair.first, pair.second)
     override fun toString() = "$number$letter"
 
