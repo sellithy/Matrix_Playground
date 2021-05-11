@@ -1,21 +1,23 @@
 
-open class Buildable<T>(init: Buildable<T>.BuildableBuilder.() -> Unit){
-    protected val list : List<T>
+abstract class Buildable<T>(protected val elements: List<T>) : List<T> by elements{
 
-    init {
-        list = BuildableBuilder().run{
+    constructor(init: BuildableBuilder<T>.() -> Unit,
+                builder : BuildableBuilder<T> = BuildableBuilder()) : this(
+        builder.run {
             init()
             build()
+        })
+
+    open class BuildableBuilder<T> {
+        protected val tempElements = mutableListOf<T>()
+
+        open fun verifyInput(t : T) = true
+
+        open operator fun T.unaryPlus() {
+            require(verifyInput(this)) { "Invalid input" }
+            tempElements += this
         }
-    }
 
-    inner class BuildableBuilder{
-        private val tempList = mutableListOf<T>()
-
-        fun add(t : T){
-            tempList += t
-        }
-
-        fun build() = tempList
+        fun build() = tempElements
     }
 }

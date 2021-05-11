@@ -4,59 +4,53 @@ private operator fun Number.plus(other: Number): Number =
     else
         this.toDouble() + other.toDouble()
 
-sealed class Expression {
-    abstract operator fun plus(exp: Expression): Expression
-    abstract override fun toString() : String
+sealed interface Expression {
+    operator fun plus(exp: Expression): Expression
+    override fun toString() : String
 }
 
-class Poly(private val poly: List<Term>) : Expression(), List<Term> by poly {
+class Poly(init : PolyBuilder.() -> Unit) : Expression,
+    Buildable<Term>(init as BuildableBuilder<Term>.() -> Unit, PolyBuilder()) {
 
-    constructor(terms: PolyBuilder.() -> Unit) : this(
-        PolyBuilder().run {
-            terms()
-            build()
-        }
-    )
-
-    constructor(vararg expressions: Expression) : this({
-        expressions.forEach { expression(it) }
+    constructor(vararg expressions: Expression) : this ({
+        expressions.forEach { +it }
     })
 
-    class PolyBuilder {
-        private val tempPoly = mutableListOf<Term>()
+    class PolyBuilder : BuildableBuilder<Term>() {
+
+        override fun Term.unaryPlus() = expression(this)
 
         operator fun Expression.unaryPlus() = expression(this)
 
-        fun expression(exp: Expression) {
+        private fun expression(exp: Expression) {
             when (exp) {
-                is Poly -> exp.poly.forEach { expression(it) }
-                is Combo -> tempPoly
+                is Poly -> exp.elements.forEach { expression(it) }
+                is Combo -> tempElements
                     .indexOfFirst { it is Combo && it.letter == exp.letter }
-                    .let { if (it != -1) tempPoly[it] = (tempPoly[it] + exp) as Combo else tempPoly.add(exp) }
-                is JustANumber -> tempPoly
+                    .let {
+                        if (it == -1) return@let tempElements.add(exp)
+                        tempElements[it] = (tempElements[it] + exp) as Combo
+                    }
+                is JustANumber -> tempElements
                     .indexOfFirst { it is JustANumber }
-                    .let { if (it != -1) tempPoly[it] = (tempPoly[it] + exp) as JustANumber else tempPoly.add(exp) }
+                    .let {
+                        if (it == -1) return@let tempElements.add(exp)
+                        tempElements[it] = (tempElements[it] + exp) as JustANumber
+                    }
             }
         }
-
-        fun build() = tempPoly
     }
 
     override fun plus(exp: Expression) =
-        Poly {
-            expression(this@Poly)
-            expression(exp)
-        }
+        Poly(this@Poly, exp)
 
-    override fun toString() = poly.joinToString(separator = " + ")
+    override fun toString() = elements.joinToString(separator = " + ")
 }
 
 //region Term
-sealed class Term : Expression() {
-    abstract override fun toString(): String
-}
+sealed interface Term : Expression
 
-class JustANumber(val number: Number) : Term() {
+class JustANumber(val number: Number) : Term {
     override fun toString() = number.toString()
 
     override fun plus(exp: Expression) =
@@ -68,7 +62,7 @@ class JustANumber(val number: Number) : Term() {
 
 }
 
-class Combo(val number: Number, val letter: Char) : Term(){
+class Combo(val number: Number, val letter: Char) : Term{
     constructor(pair: Pair<Number, Char>) : this(pair.first, pair.second)
     override fun toString() = "$number$letter"
 
@@ -78,8 +72,8 @@ class Combo(val number: Number, val letter: Char) : Term(){
 
     override fun plus(exp: Expression) =
         when (exp) {
-            is JustANumber -> Poly(exp, this)
             is Poly -> exp + this
+            is JustANumber -> Poly(exp, this)
             is Combo ->
                 if (letter == exp.letter)
                     Combo(number + exp.number, letter)

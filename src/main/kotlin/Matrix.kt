@@ -1,50 +1,24 @@
 // Column Vector
-class Vector(private val elements: List<Expression>) : List<Expression> by elements {
-
-    constructor(init: VectorBuilder.() -> Unit) : this(
-        VectorBuilder().run {
-            init()
-            build()
-        })
-
-    class VectorBuilder {
-        private val tempElements = mutableListOf<Expression>()
-
-        operator fun Expression.unaryPlus() {
-            tempElements += this
-        }
-
-        fun build() = tempElements
-    }
+class Vector(init: BuildableBuilder<Expression>.() -> Unit) :
+    Buildable<Expression>(init) {
 
     override fun toString() = elements.toString()
 }
 
-class Matrix(private val vectors: List<Vector>) : List<Vector> by vectors {
+class Matrix(init: BuildableBuilder<Vector>.() -> Unit) :
+    Buildable<Vector>(init, MatrixBuilder()) {
 
-    constructor(init: MatrixBuilder.() -> Unit) : this(
-        MatrixBuilder().run {
-            init()
-            build()
-        })
-
-    class MatrixBuilder {
-        private val tempVectors = mutableListOf<Vector>()
-
-        operator fun Vector.unaryPlus() {
-            tempVectors.firstOrNull()?.let {
-                require(this.size == it.size) { "Incompatible Vector sizes" }
-            }
-            tempVectors += this
-        }
-
-        fun build() = tempVectors
+    class MatrixBuilder : BuildableBuilder<Vector>() {
+        override fun verifyInput(t: Vector): Boolean =
+            tempElements.firstOrNull()?.let {
+                t.size == it.size
+            } ?: true
     }
 
     override fun toString(): String {
-        return Array(vectors[0].size) { i ->
-            Array(vectors.size) { j ->
-                vectors[j][i]
+        return Array(elements[0].size) { i ->
+            Array(elements.size) { j ->
+                elements[j][i]
             }
         }.joinToString(separator = "\n") { it.joinToString(separator = "\t") }
     }
