@@ -1,14 +1,14 @@
 // Column Vector
-class Vector(init: BuildableBuilder<Expression>.() -> Unit) :
-    Buildable<Expression>(init) {
+class Vector(init: ComposableBuilder<Expression>.() -> Unit) :
+    Composable<Expression>(init) {
 
     override fun toString() = elements.toString()
 }
 
-class Matrix(init: BuildableBuilder<Vector>.() -> Unit) :
-    Buildable<Vector>(init, MatrixBuilder()) {
+class Matrix(init: ComposableBuilder<Vector>.() -> Unit) :
+    Composable<Vector>(init, MatrixBuilder()) {
 
-    class MatrixBuilder : BuildableBuilder<Vector>() {
+    class MatrixBuilder : ComposableBuilder<Vector>() {
         override fun verifyInput(t: Vector): Boolean =
             tempElements.firstOrNull()?.let {
                 t.size == it.size

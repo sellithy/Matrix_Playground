@@ -10,13 +10,13 @@ sealed interface Expression {
 }
 
 class Poly(init : PolyBuilder.() -> Unit) : Expression,
-    Buildable<Term>(init as BuildableBuilder<Term>.() -> Unit, PolyBuilder()) {
+    Composable<Term>(init as ComposableBuilder<Term>.() -> Unit, PolyBuilder()) {
 
     constructor(vararg expressions: Expression) : this ({
         expressions.forEach { +it }
     })
 
-    class PolyBuilder : BuildableBuilder<Term>() {
+    class PolyBuilder : ComposableBuilder<Term>() {
 
         override fun Term.unaryPlus() = expression(this)
 
