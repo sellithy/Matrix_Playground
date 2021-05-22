@@ -9,42 +9,44 @@ sealed interface Expression {
     override fun toString() : String
 }
 
-class Poly(init : PolyBuilder.() -> Unit) : Expression,
-    Composable<Term>(init as ComposableBuilder<Term>.() -> Unit, PolyBuilder()) {
+class Poly(private val expressions : List<Term>) : List<Term> by expressions, Expression{
+    constructor(init : Builder.() -> Unit) : this(Builder().apply(init))
 
-    constructor(vararg expressions: Expression) : this ({
-        expressions.forEach { +it }
-    })
-
-    class PolyBuilder : ComposableBuilder<Term>() {
-
-        override fun Term.unaryPlus() = expression(this)
-
-        operator fun Expression.unaryPlus() = expression(this)
-
-        private fun expression(exp: Expression) {
-            when (exp) {
-                is Poly -> exp.elements.forEach { expression(it) }
-                is Combo -> tempElements
-                    .indexOfFirst { it is Combo && it.letter == exp.letter }
-                    .let {
-                        if (it == -1) return@let tempElements.add(exp)
-                        tempElements[it] = (tempElements[it] + exp) as Combo
-                    }
-                is JustANumber -> tempElements
-                    .indexOfFirst { it is JustANumber }
-                    .let {
-                        if (it == -1) return@let tempElements.add(exp)
-                        tempElements[it] = (tempElements[it] + exp) as JustANumber
-                    }
+    constructor(expressions: Iterable<Expression>) : this ({
+        expressions.forEach { exp ->
+            when(exp){
+                is Term -> +exp
+                is Poly -> exp.forEach { +it }
             }
         }
+    })
+
+    constructor(vararg expressions: Expression) : this (expressions.toList())
+
+    class Builder : PlussableList<Term>() {
+        override fun add(element: Term) : Boolean =
+            when (element) {
+                is Combo -> elements
+                    .indexOfFirst { it is Combo && it.letter == element.letter }
+                    .let {
+                        if (it == -1) return@let elements.add(element)
+                        elements[it] = (elements[it] + element) as Combo
+                        return@let true
+                    }
+                is JustANumber -> elements
+                    .indexOfFirst { it is JustANumber }
+                    .let {
+                        if (it == -1) return@let elements.add(element)
+                        elements[it] = (elements[it] + element) as JustANumber
+                        return@let true
+                    }
+            }
     }
 
     override fun plus(exp: Expression) =
         Poly(this@Poly, exp)
 
-    override fun toString() = elements.joinToString(separator = " + ")
+    override fun toString() = expressions.joinToString(separator = " + ")
 }
 
 //region Term
