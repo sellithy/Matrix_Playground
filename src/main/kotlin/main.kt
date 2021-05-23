@@ -11,6 +11,8 @@ fun main() {
         +Combo(2 to 'b')
         +Combo(5 to 'c')
     }
+
+    println(p1 + listOf<Term>(JustANumber(3)))
     println("p1: $p1")
     println("p2: $p2")
     println("p1 + p2: ${p1 + p2}")
