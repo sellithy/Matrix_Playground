@@ -1,12 +1,12 @@
 // Column Vector
-class Vector(private val expressions : List<Expression>) : List<Expression> by expressions {
+class Vector private constructor(private val expressions : List<Expression>) : List<Expression> by expressions {
     constructor(init: PlussableList<Expression>.() -> Unit)
             : this(PlussableList<Expression>().apply(init))
 
     override fun toString() = expressions.joinToString()
 }
 
-class Matrix(private val vectors : List<Vector>) : List<Vector> by vectors {
+class Matrix private constructor(private val vectors : List<Vector>) : List<Vector> by vectors {
     constructor(init: Builder.() -> Unit) : this(Builder().apply(init))
 
     init {

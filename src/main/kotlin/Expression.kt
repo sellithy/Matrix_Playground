@@ -9,7 +9,7 @@ sealed interface Expression {
     override fun toString() : String
 }
 
-class Poly(private val expressions : List<Term>) : List<Term> by expressions, Expression{
+class Poly private constructor(private val expressions : List<Term>) : List<Term> by expressions, Expression{
     constructor(init : Builder.() -> Unit) : this(Builder().apply(init))
 
     constructor(expressions: Iterable<Expression>) : this ({

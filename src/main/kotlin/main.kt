@@ -30,8 +30,8 @@ fun main() {
         +JustANumber(4)
     }
 
-    println(v1)
-    println(v2)
+    println("v1: $v1")
+    println("v2: $v2")
 
     val m1 = Matrix {
         +Vector {
