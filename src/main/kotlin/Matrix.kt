@@ -9,6 +9,10 @@ class Vector(private val expressions : List<Expression>) : List<Expression> by e
 class Matrix(private val vectors : List<Vector>) : List<Vector> by vectors {
     constructor(init: Builder.() -> Unit) : this(Builder().apply(init))
 
+    init {
+        require(vectors.all { it.size == vectors.first().size }) {"All vectors need to be the same length"}
+    }
+
     class Builder : PlussableList<Vector>() {
         private fun isValid(element: Vector) = firstOrNull()?.let {element.size == it.size} ?: true
 
