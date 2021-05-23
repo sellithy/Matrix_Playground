@@ -4,59 +4,55 @@ private operator fun Number.plus(other: Number): Number =
     else
         this.toDouble() + other.toDouble()
 
-sealed class Expression {
-    abstract operator fun plus(exp: Expression): Expression
-    abstract override fun toString() : String
+sealed interface Expression {
+    operator fun plus(exp: Expression): Expression
+    override fun toString() : String
 }
 
-class Poly(private val poly: List<Term>) : Expression(), List<Term> by poly {
+class Poly(private val expressions : List<Term>) : List<Term> by expressions, Expression{
+    constructor(init : Builder.() -> Unit) : this(Builder().apply(init))
 
-    constructor(terms: PolyBuilder.() -> Unit) : this(
-        PolyBuilder().run {
-            terms()
-            build()
-        }
-    )
-
-    constructor(vararg expressions: Expression) : this({
-        expressions.forEach { expression(it) }
-    })
-
-    class PolyBuilder {
-        private val tempPoly = mutableListOf<Term>()
-
-        operator fun Expression.unaryPlus() = expression(this)
-
-        fun expression(exp: Expression) {
-            when (exp) {
-                is Poly -> exp.poly.forEach { expression(it) }
-                is Combo -> tempPoly
-                    .indexOfFirst { it is Combo && it.letter == exp.letter }
-                    .let { if (it != -1) tempPoly[it] = (tempPoly[it] + exp) as Combo else tempPoly.add(exp) }
-                is JustANumber -> tempPoly
-                    .indexOfFirst { it is JustANumber }
-                    .let { if (it != -1) tempPoly[it] = (tempPoly[it] + exp) as JustANumber else tempPoly.add(exp) }
+    constructor(expressions: Iterable<Expression>) : this ({
+        expressions.forEach { exp ->
+            when(exp){
+                is Term -> +exp
+                is Poly -> exp.forEach { +it }
             }
         }
+    })
 
-        fun build() = tempPoly
+    constructor(vararg expressions: Expression) : this (expressions.toList())
+
+    class Builder : PlussableList<Term>() {
+        override fun add(element: Term) : Boolean =
+            when (element) {
+                is Combo -> elements
+                    .indexOfFirst { it is Combo && it.letter == element.letter }
+                    .let {
+                        if (it == -1) return@let elements.add(element)
+                        elements[it] = (elements[it] + element) as Combo
+                        return@let true
+                    }
+                is JustANumber -> elements
+                    .indexOfFirst { it is JustANumber }
+                    .let {
+                        if (it == -1) return@let elements.add(element)
+                        elements[it] = (elements[it] + element) as JustANumber
+                        return@let true
+                    }
+            }
     }
 
     override fun plus(exp: Expression) =
-        Poly {
-            expression(this@Poly)
-            expression(exp)
-        }
+        Poly(this@Poly, exp)
 
-    override fun toString() = poly.joinToString(separator = " + ")
+    override fun toString() = expressions.joinToString(separator = " + ")
 }
 
 //region Term
-sealed class Term : Expression() {
-    abstract override fun toString(): String
-}
+sealed interface Term : Expression
 
-class JustANumber(val number: Number) : Term() {
+class JustANumber(val number: Number) : Term {
     override fun toString() = number.toString()
 
     override fun plus(exp: Expression) =
@@ -68,7 +64,7 @@ class JustANumber(val number: Number) : Term() {
 
 }
 
-class Combo(val number: Number, val letter: Char) : Term(){
+class Combo(val number: Number, val letter: Char) : Term{
     constructor(pair: Pair<Number, Char>) : this(pair.first, pair.second)
     override fun toString() = "$number$letter"
 
@@ -78,8 +74,8 @@ class Combo(val number: Number, val letter: Char) : Term(){
 
     override fun plus(exp: Expression) =
         when (exp) {
-            is JustANumber -> Poly(exp, this)
             is Poly -> exp + this
+            is JustANumber -> Poly(exp, this)
             is Combo ->
                 if (letter == exp.letter)
                     Combo(number + exp.number, letter)

@@ -5,7 +5,7 @@ fun main() {
         +Combo(8 to 'a')
     }
 
-    val p2 = Poly{
+    val p2 = Poly {
         +JustANumber(6)
         +Combo(9 to 'a')
         +Combo(2 to 'b')
@@ -23,6 +23,16 @@ fun main() {
         +Combo(2 to 'a')
     }
 
+    val v2 = Vector {
+        +Combo(2 to 'a')
+        +p1
+        +JustANumber(2)
+        +JustANumber(4)
+    }
+
+    println(v1)
+    println(v2)
+
     val m1 = Matrix {
         +Vector {
             +JustANumber(1)
@@ -37,8 +47,8 @@ fun main() {
         }
 
         +v1
+//        +v2
     }
 
-    println(v1)
     println(m1)
 }

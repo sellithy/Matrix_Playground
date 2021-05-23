@@ -1,44 +1,25 @@
 // Column Vector
-class Vector(private val elements: List<Expression>) : List<Expression> by elements {
+class Vector(private val expressions : List<Expression>) : List<Expression> by expressions {
+    constructor(init: PlussableList<Expression>.() -> Unit)
+            : this(PlussableList<Expression>().apply(init))
 
-    constructor(init: VectorBuilder.() -> Unit) : this(
-        VectorBuilder().run {
-            init()
-            build()
-        })
-
-    class VectorBuilder {
-        private val tempElements = mutableListOf<Expression>()
-
-        operator fun Expression.unaryPlus() {
-            tempElements += this
-        }
-
-        fun build() = tempElements
-    }
-
-    override fun toString() = elements.toString()
+    override fun toString() = expressions.joinToString()
 }
 
-class Matrix(private val vectors: List<Vector>) : List<Vector> by vectors {
+class Matrix(private val vectors : List<Vector>) : List<Vector> by vectors {
+    constructor(init: Builder.() -> Unit) : this(Builder().apply(init))
 
-    constructor(init: MatrixBuilder.() -> Unit) : this(
-        MatrixBuilder().run {
-            init()
-            build()
-        })
+    init {
+        require(vectors.all { it.size == vectors.first().size }) {"All vectors need to be the same length"}
+    }
 
-    class MatrixBuilder {
-        private val tempVectors = mutableListOf<Vector>()
+    class Builder : PlussableList<Vector>() {
+        private fun isValid(element: Vector) = firstOrNull()?.let {element.size == it.size} ?: true
 
-        operator fun Vector.unaryPlus() {
-            tempVectors.firstOrNull()?.let {
-                require(this.size == it.size) { "Incompatible Vector sizes" }
-            }
-            tempVectors += this
+        override fun add(element: Vector): Boolean {
+            require(isValid(element)) { "Invalid dimension for this vector"}
+            return elements.add(element)
         }
-
-        fun build() = tempVectors
     }
 
     override fun toString(): String {
