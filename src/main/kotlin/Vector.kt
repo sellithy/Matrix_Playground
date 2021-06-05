@@ -14,9 +14,9 @@ class Vector private constructor(private val expressions: List<Expression>) : Li
     override fun toString() = expressions.joinToString(prefix = "[", postfix = "]")
 }
 
-operator fun JustANumber.times(vec: Vector) =
+operator fun Fraction.times(vec: Vector) =
     Vector{
         vec.map { +(this@times * it) }
     }
 
-operator fun Number.times(vec: Vector) = JustANumber(this) * vec
+operator fun Int.times(vec: Vector) = Fraction(this) * vec
