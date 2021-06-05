@@ -26,15 +26,15 @@ class Poly private constructor(private val expressions: List<Term>) : List<Term>
                     .let {
                         if (it == -1) return@let elements.add(element)
                         elements[it] = (elements[it] + element) as Combo
-                        if((elements[it] as Combo).coefficient == 0) elements.removeAt(it)
+                        if((elements[it] as Combo).coefficient equalTo 0) elements.removeAt(it)
                         return@let true
                     }
-                is JustANumber -> elements
-                    .indexOfFirst { it is JustANumber }
+                is Fraction -> elements
+                    .indexOfFirst { it is Fraction }
                     .let {
                         if (it == -1) return@let elements.add(element)
-                        elements[it] = (elements[it] + element) as JustANumber
-                        if((elements[it] as JustANumber).number == 0) elements.removeAt(it)
+                        elements[it] = (elements[it] + element) as Fraction
+                        if((elements[it] as Fraction) equalTo 0) elements.removeAt(it)
                         return@let true
                     }
             }
