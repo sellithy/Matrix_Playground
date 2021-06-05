@@ -1,22 +1,3 @@
-import kotlin.math.abs
-
-infix fun Int.over(other: Int) = Fraction(this, other)
-fun gcd(a: Int, b: Int): Int {
-    var gcd = abs(a)
-    var temp = abs(b)
-
-    while (gcd != temp) {
-        if (gcd > temp)
-            gcd -= temp
-        else
-            temp -= gcd
-    }
-
-    return gcd
-}
-
-fun lcm(a: Int, b: Int) = a * b / gcd(a, b)
-
 class Fraction(num: Int, den: Int) : Term {
     constructor(int: Int) : this(int, 1)
 

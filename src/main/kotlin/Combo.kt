@@ -1,10 +1,6 @@
 import java.lang.StringBuilder
 import java.util.*
 
-sealed interface Term : Expression {
-    operator fun times(term: Term): Term
-}
-
 class Combo(val coefficient: Fraction, val letters: SortedMap<Char, Int>) : Term {
     constructor(int: Int, char: Char) : this(Fraction(int), char)
     constructor(fraction: Fraction, char: Char) : this(fraction, sortedMapOf(char to 1))
@@ -41,7 +37,8 @@ class Combo(val coefficient: Fraction, val letters: SortedMap<Char, Int>) : Term
                 Combo(coefficient * term.coefficient,
                     (letters.asSequence() + term.letters.asSequence())
                         .groupBy({ it.key }, { it.value })
-                        .mapValues { (_, values) -> values.sum() }.toSortedMap())
+                        .mapValues { (_, values) -> values.sum() }.toSortedMap()
+                )
         }
 
     override fun times(exp: Expression) = exp * this
