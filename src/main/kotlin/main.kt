@@ -1,3 +1,11 @@
+import matrices.Matrix
+import matrices.Vector
+import pieces.Combo
+import pieces.Fraction
+import pieces.Poly
+import pieces.Term
+import util.times
+
 fun main() {
     val p1 = Poly {
         +Fraction(5)

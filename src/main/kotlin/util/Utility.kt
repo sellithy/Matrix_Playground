@@ -1,3 +1,5 @@
+package util
+
 import kotlin.math.abs
 
 fun gcd(a: Int, b: Int): Int {

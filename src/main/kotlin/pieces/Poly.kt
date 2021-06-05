@@ -1,3 +1,7 @@
+package pieces
+
+import util.PlussableList
+
 class Poly private constructor(private val expressions: List<Term>) : List<Term> by expressions, Expression {
     constructor(init: Builder.() -> Unit) : this(Builder().apply(init))
 

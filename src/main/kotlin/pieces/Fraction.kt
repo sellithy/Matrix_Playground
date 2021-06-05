@@ -1,3 +1,9 @@
+package pieces
+
+import util.gcd
+import util.lcm
+import util.over
+
 class Fraction(num: Int, den: Int) : Term {
     constructor(int: Int) : this(int, 1)
 
@@ -27,7 +33,7 @@ class Fraction(num: Int, den: Int) : Term {
             else -> number.toDouble().equals(numerator.toDouble() / denominator)
         }
 
-    operator fun plus(other: Fraction) : Fraction{
+    operator fun plus(other: Fraction) : Fraction {
         if(other equalTo 0)
             return numerator over denominator
 

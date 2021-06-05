@@ -1,3 +1,5 @@
+package pieces
+
 import java.lang.StringBuilder
 import java.util.*
 
@@ -34,7 +36,8 @@ class Combo(val coefficient: Fraction, val letters: SortedMap<Char, Int>) : Term
         when (term) {
             is Fraction -> Combo(coefficient * term, letters)
             is Combo ->
-                Combo(coefficient * term.coefficient,
+                Combo(
+                    coefficient * term.coefficient,
                     (letters.asSequence() + term.letters.asSequence())
                         .groupBy({ it.key }, { it.value })
                         .mapValues { (_, values) -> values.sum() }.toSortedMap()

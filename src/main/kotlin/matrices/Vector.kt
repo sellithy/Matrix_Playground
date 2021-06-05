@@ -1,4 +1,9 @@
-// Column Vector
+package matrices
+
+import pieces.Expression
+import util.PlussableList
+
+// Column matrices.Vector
 class Vector private constructor(private val expressions: List<Expression>) : List<Expression> by expressions {
     constructor(init: PlussableList<Expression>.() -> Unit)
             : this(PlussableList<Expression>().apply(init))
